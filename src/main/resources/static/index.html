@@ -27,7 +27,7 @@
                 response.json().then(function(data) {
                     console.log(data);
                     let list = document.getElementById("listOutput");
-                    for (let index = 1; index < data.length; index++) {
+                    for (let index = 0; index < data.length; index++) {
                         let li = document.createElement("li");
                         li.innerText = JSON.stringify(data[index]);
                         list.appendChild(li);
@@ -56,7 +56,7 @@
                 })
             });
             const response = await fetch(postRequest);
-            console.log(response.status);
+            console.log(await response.status);
         }
 
     </script>
