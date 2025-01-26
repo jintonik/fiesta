@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Starter page</title>
+</head>
+<body>
+    <form id="userForm">
+        <label>
+            Username
+            <input id="usernameInput">
+        </label>
+        <label>
+            Password
+            <input id="passwordInput">
+        </label>
+        <label>
+            Role
+            <input id="roleInput">
+        </label>
+        <button id="submit" onclick="postData()">Submit</button>
+    </form>
+    <ul id="listOutput"></ul>
+    <script>
+        function getData() {
+            fetch('api/users').then(function(response){
+                response.json().then(function(data) {
+                    console.log(data);
+                    let list = document.getElementById("listOutput");
+                    for (let index = 1; index < data.length; index++) {
+                        let li = document.createElement("li");
+                        li.innerText = JSON.stringify(data[index]);
+                        list.appendChild(li);
+                    };
+                    return data;
+                })
+            });
+        }
+        getData();
+
+        async function postData() {
+            let usernameField = document.getElementById("usernameInput");
+            let passwordField = document.getElementById("passwordInput");
+            let roleField = document.getElementById("roleInput");
+            
+            const postRequest = new Request("api/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: "cc60bbc2-0253-451c-812b-76238ffefac3",
+                    username: usernameField.value,
+                    pass: passwordField.value,
+                    role: roleField.value
+                })
+            });
+            const response = await fetch(postRequest);
+            console.log(response.status);
+        }
+
+    </script>
+</body>
+</html>
