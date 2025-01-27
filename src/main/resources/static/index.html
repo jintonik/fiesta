@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Starter page</title>
+    <style>
+        body {
+            padding: 25px;
+            background-color: white;
+            color: black;
+            font-size: 25px;
+        }
+
+        .dark-mode {
+            background-color: black;
+            color: white;
+        }
+    </style>
 </head>
-<body>
-    <form id="userForm">
+<body class="dark-mode">
+    <form id="userForm" onsubmit="getData()">
         <label>
             Username
             <input id="usernameInput">
@@ -18,8 +31,10 @@
             Role
             <input id="roleInput">
         </label>
-        <button id="submit" onclick="postData()">Submit</button>
+        <button type="button" id="submit" onclick="postData()">Submit</button>
     </form>
+    <button onclick="switchTheme()">switchTheme</button>
+
     <ul id="listOutput"></ul>
     <script>
         async function getData() {
@@ -60,6 +75,11 @@
                 })
             });
             console.log(await response.status);
+        }
+
+        function switchTheme() {
+            const element = document.body;
+            element.classList.toggle("dark-mode");
         }
 
     </script>
