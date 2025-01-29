@@ -20,7 +20,7 @@
     </style>
 </head>
 <body class="dark-mode">
-    <form id="userForm" onsubmit="getData()">
+    <form id="userForm">
         <label>
             Username
             <input id="usernameInput">
@@ -35,26 +35,20 @@
         </label>
         <button type="button" id="submit" onclick="postData()">Submit</button>
     </form>
-    <button onclick="switchTheme()">switchTheme</button>
+    <button onclick="switchTheme()">Switch Theme</button>
+    <button onclick="getUsersData()">Load More</button>
+    <button onclick="clearList()">Clear List</button>
     <div class="container text-center">Users
         <div class="p-3 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">
             <ul id="listOutput"></ul>
         </div>
     </div>
     <script>
-        async function getData() {
+        async function getUsersData() {
             try {
                 const response = await fetch("api/users");
                 const data = await response.json();
-
-                const list = document.getElementById("listOutput");
-                for(const item of data) {
-                    const div = document.createElement("div");
-                    const li = document.createElement("li");
-                    div.appendChild(li)
-                    li.innerText = JSON.stringify(item);
-                    list.appendChild(li);
-                }
+                buildList(data.items, 16)
                 console.log(data);
                 return data;
             } catch (error) {
@@ -62,7 +56,27 @@
                 throw error;
             }
         }
-        getData();
+
+        function buildList(items, count) {
+            const list = document.getElementById("listOutput");
+            for (let i = 0; i < items.length; i++) {
+                if (i === count) {
+                    return;
+                }
+                const li = document.createElement("li");
+                li.innerText = JSON.stringify(items[i]);
+                list.appendChild(li);
+            }
+        }
+
+        function clearList() {
+            const list = document.getElementById("listOutput");
+            while (list.firstChild) {
+                list.removeChild(list.firstChild)
+            }
+        }
+
+        getUsersData();
 
         async function postData() {
             let usernameField = document.getElementById("usernameInput");
@@ -75,7 +89,6 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    id: "cc60bbc2-0253-451c-812b-76238ffefac3",
                     username: usernameField.value,
                     pass: passwordField.value,
                     role: roleField.value

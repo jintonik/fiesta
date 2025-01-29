@@ -1,8 +1,10 @@
 package org.kotlin.fiesta.api.controller
 
-import org.kotlin.fiesta.domain.UserEntity
+import org.kotlin.fiesta.api.dto.UserRequestDto
+import org.kotlin.fiesta.api.dto.UserResponseDto
+import org.kotlin.fiesta.api.dto.UsersRsDto
+import org.kotlin.fiesta.domain.data.UserEntity
 import org.kotlin.fiesta.services.UserService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,25 +13,25 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import java.util.*
 
 
 @RestController
 @RequestMapping("api/users")
-class UserController(@Autowired private val userService: UserService) {
+class UserController(private val userService: UserService) {
 
     @GetMapping
-    fun getAll(): List<UserEntity> {
+    fun getAll(): UsersRsDto {
         return userService.getAll()
     }
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: UUID): UserEntity {
-        return userService.getById(id)!!
+        return userService.getById(id)
     }
 
     @PostMapping
-    fun create(@RequestBody user: UserEntity): UserEntity {
+    fun create(@RequestBody user: UserRequestDto): UserResponseDto {
         return userService.create(user)
     }
 

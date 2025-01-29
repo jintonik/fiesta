@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres
+    container_name: fiesta-db-service
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 1q2w3e
+      POSTGRES_DB: fiesta

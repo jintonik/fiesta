@@ -1,0 +1,15 @@
+spring:
+  application.name: fiesta
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fiesta
+    username: user
+    password: 1q2w3e
+  jpa:
+    properties:
+      hibernate.jdbc.lob.non_contextual_creation: false
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      hibernate.ddl-auto: none
+
+  devtools:
+    restart:
+      enabled=true:

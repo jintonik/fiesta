@@ -1,58 +1,54 @@
 package org.kotlin.fiesta.services
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.kotlin.fiesta.domain.Role
-import org.kotlin.fiesta.domain.UserEntity
+import jakarta.persistence.EntityNotFoundException
+import org.kotlin.fiesta.api.dto.UserRequestDto
+import org.kotlin.fiesta.api.dto.UserResponseDto
+import org.kotlin.fiesta.api.dto.UsersRsDto
+import org.kotlin.fiesta.domain.data.UserEntity
+import org.kotlin.fiesta.domain.repository.UserRepository
+import org.kotlin.fiesta.mappers.DomainMapper
+import org.kotlin.fiesta.mappers.UsersRsViewMapper
+import org.kotlin.fiesta.mappers.ViewMapper
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.NoSuchElementException
+
 
 @Service
-class UserService {
-    private val logger = KotlinLogging.logger{}
+class UserService(
+    val repository: UserRepository,
+    val domainMapper: DomainMapper,
+    val viewMapper: ViewMapper,
+    val usersRsViewMapper: UsersRsViewMapper
 
-    fun getAll(): List<UserEntity> {
-        return list
+) {
+    private val logger = KotlinLogging.logger {}
+
+    fun getAll(): UsersRsDto {
+        val userEntities = repository.findAll()
+        return usersRsViewMapper.mapUsers(viewMapper.userEntitiesToUserRsDTOs(userEntities))
     }
 
-    fun getById(id: UUID): UserEntity? {
-        val user = getAll().find { it.id == id }
-        if (user == null) {
-            throw NoSuchElementException("User with id = '$id' not found.")
-        }
-        return user
+    fun getById(id: UUID): UserEntity {
+        return repository.findById(id).orElseThrow { EntityNotFoundException("User with ID = '$id' was not found.") }
     }
 
-    fun create(user: UserEntity): UserEntity {
-        list.add(user)
-        logger.info { "User with name = '${user.username}' added." }
-        return user
+    fun create(user: UserRequestDto): UserResponseDto {
+
+        logger.info { "Add user with name = '${user.username}'." }
+        val userEntity = repository.saveAndFlush(domainMapper.toDomain(user))
+        return viewMapper.domainToView(userEntity)
     }
 
     fun delete(id: UUID): String {
-        val user: UserEntity = getById(id)!!
-        list.remove(user)
+        val user = getById(id)
+        repository.delete(user)
         return "{\"message\": \"User with id = '$id' deleted.\"}"
     }
 
     fun modify(id: UUID, updatedUser: UserEntity): UserEntity {
-        val user = getById(id)!!
-        list.remove(user)
-        user.id = updatedUser.id
-        user.username = updatedUser.username
-        user.pass = updatedUser.pass
-        user.role = updatedUser.role
-        list.add(user)
-        logger.info { "User with id = '$id' updated." }
-        return user
+        val user = getById(id)
+        logger.info { "Update user with id = '$id'." }
+        return repository.saveAndFlush(user)
     }
-
-    private val list = mutableListOf(
-        UserEntity(UUID.randomUUID(), "username-1", "passwd", Role.USER),
-        UserEntity(UUID.randomUUID(), "username-2", "passwd", Role.ADMIN),
-        UserEntity(UUID.randomUUID(), "username-3", "passwd", Role.USER),
-        UserEntity(UUID.randomUUID(), "username-4", "passwd", Role.ADMIN),
-        UserEntity(UUID.randomUUID(), "username-5", "passwd", Role.USER),
-        UserEntity(UUID.randomUUID(), "username-6", "passwd", Role.ADMIN),
-    )
 }
