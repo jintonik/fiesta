@@ -33,10 +33,10 @@
             Role
             <input id="roleInput">
         </label>
-        <button type="button" id="submit" onclick="postData()">Submit</button>
+        <button type="button" id="submit" onclick="createUser()">Submit</button>
     </form>
     <button onclick="switchTheme()">Switch Theme</button>
-    <button onclick="getUsersData()">Load More</button>
+    <button onclick="getUsers()">Load More</button>
     <button onclick="clearList()">Clear List</button>
     <div class="container text-center">Users
         <div class="p-3 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">
@@ -44,29 +44,67 @@
         </div>
     </div>
     <script>
-        async function getUsersData() {
-            try {
-                const response = await fetch("api/users");
-                const data = await response.json();
-                buildList(data.items, 16)
-                console.log(data);
-                return data;
-            } catch (error) {
-                console.error("Error on getting response:", error);
-                throw error;
-            }
-        }
+        const MAX_ELEMENTS_IN_LIST = 10;
+        let USERS_LIST = getUsers();
+       
+        buildList(USERS_LIST, MAX_ELEMENTS_IN_LIST);
 
-        function buildList(items, count) {
+
+        async function buildList(items, count) {
             const list = document.getElementById("listOutput");
             for (let i = 0; i < items.length; i++) {
                 if (i === count) {
                     return;
                 }
-                const li = document.createElement("li");
-                li.innerText = JSON.stringify(items[i]);
-                list.appendChild(li);
+                const item = items[i];
+                const row = buildRow(item.id, item.username, item.pass, item.role);
+                list.appendChild(row);
             }
+        }
+
+        function buildRow(userId, username, pass, role) {
+            const li = document.createElement("li");
+            let usernameField = buildTextInput(username);
+            let passwordField = buildTextInput(pass);
+            let roleField = buildTextInput(role);
+            let deleteButton = buildDeleteButton(userId);
+            let updateButton = buildUpdateButton(userId);
+
+            li.appendChild(usernameField);
+            li.appendChild(passwordField);
+            li.appendChild(roleField);
+            li.appendChild(updateButton);
+            li.appendChild(deleteButton);
+            return li;
+        }
+
+        function buildDeleteButton(userId) {
+            let button = buildButton("Delete");
+            button.addEventListener('click', function() {
+                deleteUser(userId);
+            });
+            return button;
+        }
+
+        function buildUpdateButton(userId) {
+            let button = buildButton("Update");
+            button.addEventListener('click', function() {
+                updateUser(userId);
+            });
+            return button;
+        }
+
+        function buildButton(text, element) {
+            element = document.createElement("button");
+            element.innerText = text;
+            return element;
+        }
+
+        function buildTextInput(text, element) {
+            element = document.createElement("input");
+            element.value = text;
+            element.setAttribute("type", "text");
+            return element;
         }
 
         function clearList() {
@@ -76,9 +114,19 @@
             }
         }
 
-        getUsersData();
+        async function getUsers() {
+            try {
+                const response = await fetch("api/users");
+                const data = await response.json();
+                console.log(data);
+                return await data.items;
+            } catch (error) {
+                console.error("Error on getting response:", error);
+                throw error;
+            }
+        }
 
-        async function postData() {
+        async function createUser() {
             let usernameField = document.getElementById("usernameInput");
             let passwordField = document.getElementById("passwordInput");
             let roleField = document.getElementById("roleInput");
@@ -86,7 +134,7 @@
             const response = await fetch("api/users", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     username: usernameField.value,
@@ -94,14 +142,42 @@
                     role: roleField.value
                 })
             });
-            console.log(await response.status);
+            console.log(response.status);
+        }
+
+        async function updateUser(user) {
+            try {
+                const response = await fetch(`api/users/${user.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: user.username,
+                        pass: user.pass,
+                        role: user.role
+                    })
+                });
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function deleteUser(userId) {
+            try {
+                const response = await fetch(`api/users/${userId}`, {
+                    method: "DELETE"
+                });
+                console.log(await response.json());
+            } catch (error) {
+                throw error;
+            }            
         }
 
         function switchTheme() {
             const element = document.body;
             element.classList.toggle("dark-mode");
         }
-
     </script>
 </body>
 </html>
